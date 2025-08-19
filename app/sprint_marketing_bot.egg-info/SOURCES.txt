@@ -1,0 +1,7 @@
+README.md
+pyproject.toml
+app/sprint_marketing_bot.egg-info/PKG-INFO
+app/sprint_marketing_bot.egg-info/SOURCES.txt
+app/sprint_marketing_bot.egg-info/dependency_links.txt
+app/sprint_marketing_bot.egg-info/requires.txt
+app/sprint_marketing_bot.egg-info/top_level.txt
