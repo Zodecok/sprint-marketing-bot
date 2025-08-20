@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+app/__init__.py
+app/server.py
+app/settings.py
+app/deps/__init__.py
+app/deps/chunking.py
+app/deps/embeddings.py
+app/deps/vectorstore.py
+app/utils/__init__.py
+sprint_marketing_bot.egg-info/PKG-INFO
+sprint_marketing_bot.egg-info/SOURCES.txt
+sprint_marketing_bot.egg-info/dependency_links.txt
+sprint_marketing_bot.egg-info/requires.txt
+sprint_marketing_bot.egg-info/top_level.txt
