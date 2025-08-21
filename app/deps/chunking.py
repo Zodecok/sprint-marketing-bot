@@ -18,7 +18,7 @@ def read_text_from_path(path: Path) -> str:
         return _normalize_ws(path.read_text(encoding="utf-8", errors="ignore"))
     return ""
 
-def chunk_text(text: str, chunk_size: int = 800, overlap: int = 150) -> Iterable[str]:
+def chunk_text(text: str, chunk_size: int = 400, overlap: int = 80) -> Iterable[str]:
     tokens = text.split()
     chunks = []
     i = 0

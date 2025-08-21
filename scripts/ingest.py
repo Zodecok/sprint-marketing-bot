@@ -16,6 +16,7 @@ def run_ingest() -> tuple[int, int]:
     metas, chunks = [], []
     for f in tqdm(files, desc="Docs"):
         text = read_text_from_path(f)
+        print("This is the chunks", settings.chunk_size, settings.chunk_overlap)
         for i, c in enumerate(chunk_text(text, settings.chunk_size, settings.chunk_overlap)):
             metas.append({"doc_path": str(f), "chunk_id": _chunk_id(str(f), i, c), "chunk": c})
             chunks.append(c)
