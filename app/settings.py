@@ -13,6 +13,14 @@ class Settings(BaseModel):
     embeddings_model: str = os.getenv("EMBEDDINGS_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
     chunk_size: int = int(os.getenv("CHUNK_SIZE", "180"))
     chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "30"))
+
+    #retriever settings
+    retrieval_candidates: int = int(os.getenv("RETRIEVAL_CANDIDATES", "20"))
+    min_sim: float = float(os.getenv("MIN_SIM", "0.25"))
     top_k: int = int(os.getenv("TOP_K", "5"))
+
+    #reranker settings
+    enable_rerank: str = os.getenv("ENABLE_RERANK", "false")
+    reranker_model: str = os.getenv("RERANKER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2")
 
 settings = Settings()

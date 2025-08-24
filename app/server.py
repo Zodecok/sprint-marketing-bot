@@ -14,6 +14,11 @@ def health():
 async def chat(req: ChatRequest):
     try:
         hits = retrieve(req.query, settings.top_k)
+        if not hits:
+            raise HTTPException(
+                status_code=400, 
+                detail="No relevant documents found. Try rephrasing your query or adjusting MIN_SIM threshold."
+            )
     except FileNotFoundError:
         raise HTTPException(status_code=400, detail="No index found. Run ingest first.")
 
