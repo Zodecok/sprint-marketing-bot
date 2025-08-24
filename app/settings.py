@@ -13,6 +13,7 @@ class Settings(BaseModel):
     embeddings_model: str = os.getenv("EMBEDDINGS_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
     chunk_size: int = int(os.getenv("CHUNK_SIZE", "180"))
     chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "30"))
+    bad_query_length: int = int(os.getenv("BAD_QUERY_LENGTH", "1000"))
 
     #retriever settings
     retrieval_candidates: int = int(os.getenv("RETRIEVAL_CANDIDATES", "20"))
