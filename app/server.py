@@ -4,6 +4,11 @@ from app.models import ChatRequest, ChatResponse, Source
 from app.rag_pipeline import retrieve, build_prompt
 from app.deps.llm import complete
 from app.deps.logger import log_chat
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Sprint Marketing Bot API")
 
@@ -30,7 +35,6 @@ def _bad_query(q:str) -> bool:
 async def chat(req: ChatRequest):
     if _bad_query(req.query):
         raise HTTPException(status_code=400, detail="Invalid or disallowed query.")
-    
     try:
         hits = retrieve(req.query, settings.top_k)
     except FileNotFoundError:
