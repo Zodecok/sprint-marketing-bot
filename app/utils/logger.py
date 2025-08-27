@@ -1,8 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from datetime import datetime, timezone
-import json
-import re
+import json, re
 
 LOG_DIR = Path("data/logs")
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -13,11 +12,17 @@ def _redact(text: str) -> str:
     text = re.sub(r"\b(\+?\d[\d\s\-().]{7,}\d)\b", "[redacted-phone]", text)
     return text
 
-def log_chat(query: str, answer: str, hits):
+def log_chat(*, request_id: str, index_version: str, query: str, answer: str, hits, config: dict):
+    """
+    hits: list of (score, meta_dict) tuples
+    """
     entry = {
+        "request_id": request_id,
         "ts": datetime.now(timezone.utc).isoformat(),
+        "index_version": index_version,
         "query": _redact(query)[:1000],
         "answer_preview": _redact(answer)[:400],
+        "config": config,
         "hits": [
             {"score": float(s), "doc_path": m["doc_path"], "chunk_id": m["chunk_id"]}
             for (s, m) in hits
