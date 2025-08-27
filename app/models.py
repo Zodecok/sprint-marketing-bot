@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import List
 
 class ChatRequest(BaseModel):
     query: str
@@ -8,5 +7,5 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
     has_sources: bool = True
-    sources_count = 0
+    sources_count: int = 0
     request_id: str

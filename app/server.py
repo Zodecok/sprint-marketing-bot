@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
-from uuid import uuid64
+from uuid import uuid4
 from app.settings import settings
-from app.models import ChatRequest, ChatResponse, Source
+from app.models import ChatRequest, ChatResponse
 from app.rag_pipeline import retrieve, build_prompt
 from app.deps.llm import complete
 from app.utils.logger import log_chat
@@ -45,7 +45,7 @@ async def chat(req: ChatRequest):
     if _bad_query(req.query):
         raise HTTPException(status_code=400, detail="Invalid or disallowed query.")
     
-    request_id = str(uuid64())
+    request_id = str(uuid4())
     index_version = _manifest.get("index_version", "unknown")
 
     try:
