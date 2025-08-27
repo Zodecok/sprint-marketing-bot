@@ -1,4 +1,4 @@
-from app.deps.logger import _redact
+from utils.logger import _redact
 
 def test_redact():
     text = """
