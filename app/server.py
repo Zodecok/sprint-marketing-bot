@@ -95,6 +95,5 @@ async def chat(req: ChatRequest):
         },
         completion_timetaken_ms=completion_ms,
     )
-    logger.error("Source count: %d", len(hits))  # log source count for monitoring
     
     return ChatResponse(answer=answer, has_sources=True, source_count=len(hits), request_id=request_id,)
