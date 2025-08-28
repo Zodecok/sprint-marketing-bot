@@ -28,7 +28,16 @@
 
     const iframe = document.createElement("iframe");
     iframe.className = "sb-iframe";
-    iframe.src = origin + `?api=${encodeURIComponent(initial.api || "")}`;
+
+    // Build iframe src with optional api query param
+    function buildSrc(srcOrigin, api) {
+      if (typeof api === "string" && api.length > 0) {
+        return srcOrigin + `?api=${encodeURIComponent(api)}`;
+      }
+      return srcOrigin;
+    }
+
+    iframe.src = buildSrc(origin, initial.api);
 
     const open = () => iframe.classList.add("open");
     const close = () => iframe.classList.remove("open");
@@ -46,11 +55,10 @@
       init: (opts) => {
         if (!opts) return;
         if (typeof opts.label === "string") btn.textContent = opts.label;
-        if (typeof opts.api === "string") iframe.src = origin + `?api=${encodeURIComponent(opts.api)}`;
+        if (typeof opts.api === "string") iframe.src = buildSrc(origin, opts.api);
       },
       open,
       close
     };
   });
 })();
-
