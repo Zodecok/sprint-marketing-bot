@@ -36,21 +36,31 @@ def retrieve(query: str, k: int) -> List[Tuple[float, dict]]:
     return results[:k]
 
 def build_prompt(query: str, contexts: List[dict]) -> str:
-    # Deterministic prompt that forces source usage + inline citations [#]
-
+    """
+    Build a customer-facing prompt for the LLM (Large Language Model).
+    - Uses only the chunk text (no paths/IDs) to avoid leaking internal metadata.
+    - Instructs the model to write a concise, friendly, benefit-led answer.
+    - If info is missing, respond honestly and suggest a next step.
+    - No citations or brackets like [1], [2] in the output.
+    """
     # contexts is a list of dicts with keys: chunk, doc_path, chunk_id
-    blocks = []
-    for i, c in enumerate(contexts):
-        blocks.append(
-            f"[{i+1}] {c['chunk']}\n"
-            f"(SOURCE: {c['doc_path']} | CHUNK_ID: {c['chunk_id']})"
-        )
-    context_blob = "\n\n".join(blocks)
+    # We intentionally do NOT include doc_path/chunk_id in the context we show the LLM.
+    blocks = [c["chunk"] for c in contexts]
+    context_blob = "\n\n---\n\n".join(blocks) if blocks else "[No relevant knowledge]"
+
     return (
-        "You are a Sprint Marketing assistant. Answer ONLY with facts from the provided sources. "
-        "If the answer is not in the sources, say you don’t have that information. "
-        "Cite sources inline like [1], [2]. At the end, add a 'Sources' line listing the doc_path and chunk_ids you used.\n\n"
-        f"User question: {query}\n\n"
-        f"SOURCES:\n{context_blob}\n\n"
-        "Answer:\n"
+        "You are Sprint Marketing’s assistant for prospective customers.\n"
+        "Write a concise, friendly answer using only the Knowledge below.\n"
+        "DO NOT show citations, file names, chunk IDs, or internal notes.\n"
+        "If the answer is not in the Knowledge, say you don't have that information and suggest a next step.\n"
+        "\n"
+        "Style rules:\n"
+        "- Lead with the customer benefit.\n"
+        "- Prefer plain language and short paragraphs or tight bullet points.\n"
+        "- Keep it under ~120 words when possible.\n"
+        "- End with a simple call to action (e.g., how to contact or book a call).\n"
+        "\n"
+        f"Customer question:\n{query}\n\n"
+        f"Knowledge:\n{context_blob}\n\n"
+        "Now draft the reply:\n"
     )

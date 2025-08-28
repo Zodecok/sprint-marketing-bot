@@ -91,5 +91,6 @@ async def chat(req: ChatRequest):
             "reranker_model": settings.reranker_model,
         },
     )
+    logger.error("Source count: %d", len(hits))  # log source count for monitoring
     
     return ChatResponse(answer=answer, has_sources=True, source_count=len(hits), request_id=request_id,)

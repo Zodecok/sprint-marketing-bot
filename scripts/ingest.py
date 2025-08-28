@@ -9,7 +9,7 @@ import hashlib, json
 from datetime import datetime, timezone
 
 DOCS_DIR = Path("docs")
-MANIFEST_PATH = Path("data/manifest.jsonl")
+MANIFEST_PATH = Path("data/index_manifest.json")
 
 def _hash_index(metas: list[dict]) -> str:
     """Stable version hash from chunk_ids (and counts)."""
@@ -37,7 +37,6 @@ def run_ingest() -> tuple[int, int]:
     metas, chunks = [], []
     for f in tqdm(files, desc="Docs"):
         text = read_text_from_path(f)
-        print("This is the chunks", settings.chunk_size, settings.chunk_overlap)
         for i, c in enumerate(chunk_text(text, settings.chunk_size, settings.chunk_overlap)):
             metas.append({"doc_path": str(f), "chunk_id": _chunk_id(str(f), i, c), "chunk": c})
             chunks.append(c)

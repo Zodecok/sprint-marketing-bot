@@ -7,5 +7,5 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
     has_sources: bool = True
-    sources_count: int = 0
+    source_count: int = 0
     request_id: str
