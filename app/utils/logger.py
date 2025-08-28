@@ -12,7 +12,7 @@ def _redact(text: str) -> str:
     text = re.sub(r"\b(\+?\d[\d\s\-().]{7,}\d)\b", "[redacted-phone]", text)
     return text
 
-def log_chat(*, request_id: str, index_version: str, query: str, answer: str, hits, config: dict):
+def log_chat(*, request_id: str, index_version: str, query: str, answer: str, hits, config: dict, completion_timetaken_ms: int | None = None):
     """
     hits: list of (score, meta_dict) tuples
     """
@@ -28,6 +28,8 @@ def log_chat(*, request_id: str, index_version: str, query: str, answer: str, hi
             for (s, m) in hits
         ],
     }
+    if completion_timetaken_ms is not None:
+        entry["completion"] = {"timetaken_ms": int(completion_timetaken_ms)}
     dayfile = LOG_DIR / (datetime.now(timezone.utc).strftime("%Y%m%d") + ".jsonl")
     with dayfile.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")

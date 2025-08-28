@@ -7,6 +7,7 @@ from app.deps.llm import complete
 from app.utils.logger import log_chat
 from app.utils.index_manifest import read_index_manifest
 import logging
+import time
 
 # Set up logging
 logging.basicConfig(level=logging.WARNING)
@@ -74,7 +75,9 @@ async def chat(req: ChatRequest):
     # build prompt and answer
     contexts = [h[1] for h in hits]
     prompt = build_prompt(req.query, contexts)
+    t0 = time.monotonic()
     answer = await complete(prompt)
+    completion_ms = int((time.monotonic() - t0) * 1000)
 
     # Log full provenance server-side only
     log_chat(
@@ -90,6 +93,7 @@ async def chat(req: ChatRequest):
             "enable_rerank": settings.enable_rerank,
             "reranker_model": settings.reranker_model,
         },
+        completion_timetaken_ms=completion_ms,
     )
     logger.error("Source count: %d", len(hits))  # log source count for monitoring
     
