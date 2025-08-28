@@ -1,6 +1,15 @@
 import ChatWidget from "./components/ChatWidget";
+import { useState } from "react";
 
 export default function App() {
+  const [health, setHealth] = useState<string>("");
+
+  async function ping() {
+    const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    const res = await fetch(`${base}/health`, { method: "GET" });
+    setHealth(`${res.status} ${res.statusText}`);
+  }
+
   return (
     <main className="min-h-screen">
       <header className="px-6 py-4 bg-white border-b">
@@ -9,9 +18,10 @@ export default function App() {
           <a href="/admin" className="text-sm text-blue-600 hover:underline">Admin</a>
         </div>
       </header>
-      <section className="max-w-6xl mx-auto p-6">
-        <h2 className="text-xl font-medium mb-2">Website Demo</h2>
-        <p className="text-gray-600">This page simulates your public site. Open the chat in the bottom-right to test.</p>
+      <section className="max-w-6xl mx-auto p-6 space-y-3">
+        <button onClick={ping} className="px-3 py-2 rounded-lg bg-blue-600 text-white">Ping /health</button>
+        {health && <div className="text-sm text-gray-700">Health response: {health}</div>}
+        <p className="text-gray-600">Open DevTools → Network to inspect CORS headers.</p>
       </section>
       <ChatWidget />
     </main>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sprint Bot – GitHub Pages Demo</title>
+    <style>
+      :root { --sb-accent: 51,97,255; }
+      body { font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 24px; }
+      .wrap { max-width: 800px; margin: 0 auto; }
+      h1 { margin: 0 0 8px; font-size: 22px; }
+      .note { color: #4b5563; font-size: 14px; margin-bottom: 16px; }
+      code { background: #f3f4f6; padding: 2px 6px; border-radius: 6px; }
+      .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; background: #fff; }
+      .grid { display: grid; gap: 12px; }
+      .grid.two { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+      ul { margin: 8px 0 0 20px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Sprint Bot – GitHub Pages Demo</h1>
+      <div class="note">This page hosts the floating widget and loads the UI in an iframe.</div>
+
+      <div class="grid two">
+        <div class="card">
+          <strong>How it works</strong>
+          <ul>
+            <li>This page includes <code>widget.js</code> from the same folder.</li>
+            <li><code>window.SprintBot.config.origin</code> points to your UI site.</li>
+            <li>We append <code>?api=...</code> so the UI talks to your API.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <strong>Tip</strong>
+          <ul>
+            <li>Set <code>--sb-accent</code> to change button color.</li>
+            <li>Ensure your API is HTTPS when embedding on GitHub Pages.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Local development defaults (you can change later for production)
+      window.SprintBot = { config: {
+        // UI dev server (Vite)
+        origin: "http://localhost:5173/",
+
+        // FastAPI server
+        api: "http://localhost:8000",
+
+        // Button label
+        label: "Chat"
+      }};
+    </script>
+
+    <!-- Load the widget script from the same folder -->
+    <script src="./widget.js" defer></script>
+  </body>
+  </html>
