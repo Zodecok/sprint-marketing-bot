@@ -1,0 +1,3 @@
+{"q": "What services does Sprint Marketing offer?", "must_include": ["services", "benefit"], "min_sources": 1}
+{"q": "How do I contact you?", "must_include": ["email", "call"], "min_sources": 1}
+{"q": "What’s the onboarding timeline?", "must_include": ["weeks", "process"], "min_sources": 1}
