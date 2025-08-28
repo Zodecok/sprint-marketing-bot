@@ -1,14 +1,18 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
 from uuid import uuid4
 from app.settings import settings
 from app.models import ChatRequest, ChatResponse
 from app.rag_pipeline import retrieve, build_prompt
 from app.deps.llm import complete
-from app.utils.logger import log_chat
+from app.utils.logger import log_chat, _redact
 from app.utils.index_manifest import read_index_manifest
 import logging
 import time
+from app.models import UIEventIn, ConversationList, ConversationSummary
+from app.utils.paths import ui_events_log_path, conversations_log_path
+from app.utils.log_io import jsonl_append, jsonl_tail
 
 # Set up logging
 logging.basicConfig(level=logging.WARNING)
@@ -86,6 +90,15 @@ async def chat(req: ChatRequest):
                 "reranker_model": settings.reranker_model,
             },
         )
+        # Minimal conversations summary writer (no sources case)
+        jsonl_append(
+            conversations_log_path(),
+            {
+                "ts": int(time.time() * 1000),
+                "user": _redact(req.query),
+                "assistant": _redact(answer)[:2000],
+            },
+        )
         return ChatResponse(answer=answer, has_sources=False, source_count=0, request_id=request_id)
     
     # build prompt and answer
@@ -111,5 +124,45 @@ async def chat(req: ChatRequest):
         },
         completion_timetaken_ms=completion_ms,
     )
-    
+    # Minimal conversations summary writer (with sources case)
+    jsonl_append(
+        conversations_log_path(),
+        {
+            "ts": int(time.time() * 1000),
+            "user": _redact(req.query),
+            "assistant": _redact(answer)[:2000],
+        },
+    )
+
     return ChatResponse(answer=answer, has_sources=True, source_count=len(hits), request_id=request_id,)
+
+
+@app.post("/ui_event")
+def ui_event(evt: UIEventIn):
+    record = {
+        "ts_server": int(time.time() * 1000),
+        "ts_client": evt.ts,
+        "name": evt.name,
+        "payload": evt.payload or {},
+    }
+    jsonl_append(ui_events_log_path(), record)
+    return {"ok": True}
+
+
+@app.get("/conversations", response_model=ConversationList)
+def conversations(limit: int = Query(50, ge=1, le=500)):
+    # Reads from a JSONL file you populate when /chat completes
+    raw = jsonl_tail(conversations_log_path(), limit)
+    items: List[ConversationSummary] = []
+    for r in raw:
+        try:
+            items.append(ConversationSummary(
+                ts=int(r.get("ts", int(time.time() * 1000))),
+                user=str(r.get("user", ""))[:300],
+                assistant=str(r.get("assistant", ""))[:300],
+            ))
+        except Exception:
+            continue
+    # reverse so newest first if your logger appends chronologically
+    items = list(reversed(items))
+    return ConversationList(items=items)

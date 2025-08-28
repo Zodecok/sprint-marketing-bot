@@ -2,8 +2,9 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import datetime, timezone
 import json, re
+from app.utils.paths import logs_dir
 
-LOG_DIR = Path("data/logs")
+LOG_DIR = Path(logs_dir())
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 def _redact(text: str) -> str:
