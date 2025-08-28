@@ -52,7 +52,13 @@ export function logEvent(name: string, payload: Record<string, unknown> = {}) {
   try {
     const url = `${BASE}/ui_event`;
     const data = JSON.stringify({ name, payload, ts: Date.now() });
-    if ("sendBeacon" in navigator) navigator.sendBeacon(url, data);
-    else fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: data });
+    // Use sendBeacon with a JSON Blob so FastAPI parses it as JSON
+    if ("sendBeacon" in navigator) {
+      const blob = new Blob([data], { type: "application/json" });
+      const queued = navigator.sendBeacon(url, blob);
+      if (queued) return;
+    }
+    // Fallback to fetch if Beacon not available or queuing failed
+    fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: data });
   } catch {}
 }

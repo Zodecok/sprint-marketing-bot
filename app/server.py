@@ -29,7 +29,10 @@ ALLOWED_ORIGINS = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=False,  # set True only if you send cookies/Authorization
+    # Allow credentials so browsers accept preflight for dev origin 5173
+    # Even though we don't currently use cookies/Authorization, some browsers
+    # require this header when the request's credentials mode is 'include'.
+    allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
     max_age=86400,
