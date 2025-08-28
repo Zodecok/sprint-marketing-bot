@@ -1,4 +1,7 @@
-const BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { runtimeApiBase } from "./runtimeApi";
+
+const run = runtimeApiBase();
+const BASE = run || import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
 
@@ -35,4 +38,3 @@ export function logEvent(name: string, payload: Record<string, unknown> = {}) {
     else fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: data });
   } catch {}
 }
-
