@@ -18,7 +18,8 @@ class Settings(BaseModel):
     #retriever settings
     retrieval_candidates: int = int(os.getenv("RETRIEVAL_CANDIDATES", "20"))
     min_sim: float = float(os.getenv("MIN_SIM", "0.25"))
-    top_k: int = int(os.getenv("TOP_K", "5"))
+    # Prefer RETRIEVAL_TOP_K; fall back to legacy TOP_K for compatibility
+    retrieval_top_k: int = int(os.getenv("RETRIEVAL_TOP_K", os.getenv("TOP_K", "5")))
 
     #reranker settings
     enable_rerank: str = os.getenv("ENABLE_RERANK", "false")

@@ -14,16 +14,18 @@ def retrieve(query: str, k: int) -> List[Tuple[float, dict]]:
     qvec = np.array(embed_texts([query]), dtype="float32")
     qvec = _cosine_norm(qvec)  # cosine via inner product
 
-    n_candidates = int(settings.retrieval_candidates)
+    # Retrieve more candidates to improve recall (esp. with reranker)
+    n_candidates = max(k, int(settings.retrieval_candidates))
     # D is similarity scores, I is indices into metas
-    D, I = index.search(qvec, k)
+    D, I = index.search(qvec, n_candidates)
 
     # similarity score with metadata
     prelim: List[Tuple[float, dict]] = [(float(s), metas[i]) for s, i in zip(D[0].tolist(), I[0].tolist())]
 
     use_rerank = str(settings.enable_rerank).lower() == "true" and CE_AVAILABLE
     if use_rerank:
-        reranked = ce_rerank(query, prelim, settings.reranker_model, max(k, 10))
+        # Rerank all retrieved candidates, then truncate to k
+        reranked = ce_rerank(query, prelim, settings.reranker_model, n_candidates)
         results = [(s, m) for (s, m) in reranked]                # CE scores
     else:
         prelim.sort(key=lambda x: x[0], reverse=True)            # vector scores

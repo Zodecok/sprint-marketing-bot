@@ -73,7 +73,7 @@ async def chat(req: ChatRequest):
     index_version = _manifest.get("index_version", "unknown")
 
     try:
-        hits = retrieve(req.query, settings.top_k)
+        hits = retrieve(req.query, settings.retrieval_top_k)
     except FileNotFoundError:
         raise HTTPException(status_code=400, detail="No index found. Run ingest first.")
 
@@ -86,7 +86,7 @@ async def chat(req: ChatRequest):
             answer=answer,
             hits=[],
             config={
-                "top_k": settings.top_k,
+                "retrieval_top_k": settings.retrieval_top_k,
                 "retrieval_candidates": settings.retrieval_candidates,
                 "min_sim": settings.min_sim,
                 "enable_rerank": settings.enable_rerank,
@@ -119,7 +119,7 @@ async def chat(req: ChatRequest):
         answer=answer,
         hits=hits,
         config={
-            "top_k": settings.top_k,
+            "retrieval_top_k": settings.retrieval_top_k,
             "retrieval_candidates": settings.retrieval_candidates,
             "min_sim": settings.min_sim,
             "enable_rerank": settings.enable_rerank,
