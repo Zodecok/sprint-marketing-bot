@@ -11,6 +11,7 @@ def _redact(text: str) -> str:
     # Very light PII redaction (emails/phones). Extend as needed.
     text = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "[redacted-email]", text)
     text = re.sub(r"\b(\+?\d[\d\s\-().]{7,}\d)\b", "[redacted-phone]", text)
+    #TODO: More redaction (names, addresses, etc)
     return text
 
 def log_chat(*, request_id: str, index_version: str, query: str, answer: str, hits, config: dict, completion_timetaken_ms: int | None = None):

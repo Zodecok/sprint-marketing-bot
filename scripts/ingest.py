@@ -32,6 +32,8 @@ def _write_manifest(metas: list[dict], files_count: int, chunks_count: int):
 def _chunk_id(doc_path: str, idx: int, chunk: str) -> str:
     return hashlib.sha1((doc_path + str(idx) + chunk[:64]).encode("utf-8")).hexdigest()[:12]
 
+# TODO: modify to use resource files that are laid out already separated by content type
+# this is later to increase the effectiveness of the reranker and vectorisation
 def run_ingest() -> tuple[int, int]:
     files = [p for p in DOCS_DIR.glob("**/*") if p.is_file()]
     metas, chunks = [], []

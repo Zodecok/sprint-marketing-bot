@@ -11,6 +11,7 @@ async def complete(prompt: str) -> str:
     # Stubs for future providers; raise a clear error for now
     raise ValueError(f"Unsupported LLM_PROVIDER='{settings.llm_provider}'. "
                      f"Supported: ['ollama'] for now.")
+    #TODO: add more providers and a proper catch for this error
 
 # Concrete Ollama client
 async def complete_ollama(prompt: str) -> str:
@@ -25,4 +26,5 @@ async def complete_ollama(prompt: str) -> str:
         r = await client.post(url, json=payload)
         r.raise_for_status()
         data = r.json()
+        #TODO: handle streaming responses if needed
     return (data.get("response") or "").strip()
