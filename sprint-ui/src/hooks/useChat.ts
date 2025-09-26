@@ -16,6 +16,7 @@ export function useChat(initial: ChatMessage[] = []) {
     setError(null);
     setIsStreaming(true);
     logEvent("chat_send", { chars: text.length });
+    logEvent("chat_stream_start"); // TODO: include token estimates once backend streams tokens.
 
     try {
       let acc = "";
@@ -27,10 +28,12 @@ export function useChat(initial: ChatMessage[] = []) {
           return copy;
         });
       }
+      logEvent("chat_stream_end", { tokens: acc.length });
       logEvent("chat_complete", { tokens: acc.length });
-    } catch (e: any) {
-      setError(e?.message || "Chat failed");
-      logEvent("chat_error", { msg: e?.message });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Chat failed";
+      setError(message);
+      logEvent("chat_error", { msg: message });
     } finally {
       setIsStreaming(false);
     }
@@ -38,4 +41,3 @@ export function useChat(initial: ChatMessage[] = []) {
 
   return { messages, send, isStreaming, error };
 }
-

@@ -71,11 +71,14 @@ async def chat(req: ChatRequest):
     
     request_id = str(uuid4())
     index_version = _manifest.get("index_version", "unknown")
+    #TODO: add database of certain answers to bypass RAG for common questions?
 
     try:
         hits = retrieve(req.query, settings.retrieval_top_k)
     except FileNotFoundError:
         raise HTTPException(status_code=400, detail="No index found. Run ingest first.")
+    #TODO: Catch this error and run ingest automatically?
+
 
     if not hits:
         answer = "I don’t have that information in my sources yet."
@@ -98,8 +101,9 @@ async def chat(req: ChatRequest):
             conversations_log_path(),
             {
                 "ts": int(time.time() * 1000),
-                "user": _redact(req.query),
-                "assistant": _redact(answer)[:2000],
+                "user": req.query,
+                "assistant": answer,
+                # redaction not necessary here since no sources
             },
         )
         return ChatResponse(answer=answer, has_sources=False, source_count=0, request_id=request_id)
