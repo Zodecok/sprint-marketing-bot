@@ -1,2 +1,31 @@
-cd sprint-ui
-npm run dev
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+UI_DIR="$ROOT/sprint-ui"
+FE_HOST="${FE_HOST:-127.0.0.1}"
+FE_PORT="${FE_PORT:-5173}"
+API_URL="${VITE_API_BASE_URL:-http://localhost:8000}"
+STAMP="$UI_DIR/.npm-install.stamp"
+
+if [ ! -d "$UI_DIR" ]; then
+  echo "Error: sprint-ui directory not found at $UI_DIR" >&2
+  exit 1
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "Error: npm is required but not found in PATH." >&2
+  exit 1
+fi
+
+if [ ! -f "$STAMP" ] || [ "$UI_DIR/package-lock.json" -nt "$STAMP" ]; then
+  echo "→ Installing npm dependencies"
+  (cd "$UI_DIR" && npm install)
+  touch "$STAMP"
+fi
+
+cd "$UI_DIR"
+export VITE_API_BASE_URL="$API_URL"
+
+echo "→ Starting Vite dev server on http://${FE_HOST}:${FE_PORT} (API → ${VITE_API_BASE_URL})"
+exec npm run dev -- --host "$FE_HOST" --port "$FE_PORT"

@@ -13,7 +13,9 @@ app/deps/rerank.py
 app/deps/vectorstore.py
 app/utils/__init__.py
 app/utils/index_manifest.py
+app/utils/log_io.py
 app/utils/logger.py
+app/utils/paths.py
 sprint_marketing_bot.egg-info/PKG-INFO
 sprint_marketing_bot.egg-info/SOURCES.txt
 sprint_marketing_bot.egg-info/dependency_links.txt
