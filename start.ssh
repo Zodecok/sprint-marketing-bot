@@ -52,10 +52,6 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-if [ ${#PIDS[@]} -gt 1 ]; then
-  echo "→ Widget test page: http://${WIDGET_HOST}:${WIDGET_PORT}/test-host.html"
-fi
-
 echo "→ Press Ctrl+C to stop both servers."
 
 wait "${PIDS[@]}"

@@ -103,9 +103,11 @@ export default function ChatWidget() {
               agentName={AGENT_NAME}
               error={error}
             >
+              {/* TODO: Surface a dismissable privacy/terms notice that scrolls away after the first user message. */}
               {showTyping && <TypingIndicator />}
             </MessageList>
 
+            {/* TODO: Render tappable question suggestions above the composer that prefill and submit common queries. */}
             <Composer
               ref={textareaRef}
               value={input}
