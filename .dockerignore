@@ -1,0 +1,10 @@
+.git
+__pycache__
+*.py[cod]
+*.swp
+.env
+.ssh
+node_modules
+sprint-ui/node_modules
+site
+.docs_cache

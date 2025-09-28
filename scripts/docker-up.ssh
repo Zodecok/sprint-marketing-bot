@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMPOSE_ARGS=("-f" "docker-compose.yml")
+
+if [[ "${1:-}" == "--dev" ]]; then
+  COMPOSE_ARGS+=("-f" "docker-compose.dev.yml")
+  shift
+fi
+
+printf '\n▶ Building images\n'
+docker compose "${COMPOSE_ARGS[@]}" build "$@"
+
+printf '\n▶ Starting stack\n'
+docker compose "${COMPOSE_ARGS[@]}" up -d
+
+printf '\n▶ Ensuring vector index exists\n'
+if docker compose "${COMPOSE_ARGS[@]}" exec -T api test -f /data/index/index.faiss; then
+  echo "Index already present – skipping ingest"
+else
+  docker compose "${COMPOSE_ARGS[@]}" exec -T api python -m scripts.ingest
+fi
+
+docker compose "${COMPOSE_ARGS[@]}" ps

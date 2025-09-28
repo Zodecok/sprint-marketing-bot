@@ -1,12 +1,13 @@
 import json, os, faiss
 import numpy as np
-from pathlib import Path
 from typing import List, Tuple
+from app.utils.paths import index_faiss_path, index_meta_path, index_dir
 
-INDEX_PATH = "data/index.faiss"
-META_PATH  = "data/meta.jsonl"
+INDEX_PATH = str(index_faiss_path())
+META_PATH = str(index_meta_path())
 
 def save_index(index: faiss.IndexFlatIP, metas: List[dict]):
+    index_dir().mkdir(parents=True, exist_ok=True)
     faiss.write_index(index, INDEX_PATH)
     with open(META_PATH, "w", encoding="utf-8") as f:
         for m in metas:

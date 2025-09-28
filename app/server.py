@@ -11,8 +11,10 @@ from app.utils.index_manifest import read_index_manifest
 import logging
 import time
 from app.models import UIEventIn, ConversationList, ConversationSummary
-from app.utils.paths import ui_events_log_path, conversations_log_path
+from app.utils.paths import ui_events_log_path, conversations_log_path, index_faiss_path
 from app.utils.log_io import jsonl_append, jsonl_tail
+from fastapi.responses import JSONResponse
+import httpx
 
 # Set up logging
 logging.basicConfig(level=logging.WARNING)
@@ -41,6 +43,7 @@ _manifest = read_index_manifest()
 
 @app.get("/health")
 def health():
+    """Light-weight health probe used by liveness checks."""
     return {
         "status": "ok",
         "model": settings.ollama_model,
@@ -48,6 +51,38 @@ def health():
         "index_version": _manifest.get("index_version"),
         "chunks": _manifest.get("chunks_count"),
     }
+
+
+async def _ollama_ready(timeout: float = 2.0) -> bool:
+    """Check whether the configured Ollama endpoint is reachable."""
+    base_url = settings.ollama_base_url.rstrip("/")
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(f"{base_url}/api/tags")
+        resp.raise_for_status()
+        # consider ready if the endpoint returns a JSON with models listed
+        if resp.headers.get("content-type", "").startswith("application/json"):
+            data = resp.json()
+            models = data.get("models") or []
+            return any((m.get("name") == settings.ollama_model) for m in models) or bool(models)
+        return True
+    except Exception:
+        return False
+
+
+@app.get("/ready")
+async def ready():
+    """Readiness probe used by orchestration to gate traffic."""
+    manifest_ready = index_faiss_path().exists()
+    ollama_ready = await _ollama_ready()
+    ready_state = manifest_ready and ollama_ready
+    status_code = 200 if ready_state else 503
+    payload = {
+        "status": "ready" if ready_state else "starting",
+        "manifest": manifest_ready,
+        "ollama": ollama_ready,
+    }
+    return JSONResponse(payload, status_code=status_code)
 
 def _bad_query(q:str) -> bool:
     # Hard limits

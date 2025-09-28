@@ -1,0 +1,122 @@
+version: "3.9"
+
+services:
+  proxy:
+    image: caddy:2.9-alpine
+    container_name: sprint_proxy
+    depends_on:
+      - ui
+      - api
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - edge
+      - internal
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: sprint_api
+    environment:
+      APP_DATA_DIR: /data
+      APP_LOG_DIR: /data/logs
+      APP_INDEX_DIR: /data/index
+      OLLAMA_BASE_URL: http://model:11434
+      POSTGRES_DSN: postgresql://sprint:sprint@db:5432/sprint
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - data_index:/data/index
+      - data_logs:/data/logs
+      - models_cache:/models
+      - ./docs:/app/docs:ro
+    depends_on:
+      model:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/ready || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: sprint_ui
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - internal
+
+  db:
+    image: ankane/pgvector:latest
+    container_name: sprint_db
+    environment:
+      POSTGRES_DB: sprint
+      POSTGRES_USER: sprint
+      POSTGRES_PASSWORD: sprint
+      PGDATA: /data/db
+    volumes:
+      - data_db:/data/db
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sprint_redis
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  model:
+    image: ollama/ollama:latest
+    container_name: sprint_model
+    privileged: true
+    volumes:
+      - models_cache:/models
+    environment:
+      OLLAMA_HOST: 0.0.0.0
+      OLLAMA_MODELS: /models
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  data_db:
+  data_index:
+  data_logs:
+  models_cache:
+
+networks:
+  edge:
+  internal:
+    internal: true

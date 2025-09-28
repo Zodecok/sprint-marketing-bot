@@ -50,6 +50,7 @@ def build_prompt(query: str, contexts: List[dict]) -> str:
     blocks = [c["chunk"] for c in contexts]
     context_blob = "\n\n---\n\n".join(blocks) if blocks else "[No relevant knowledge]"
 
+    # TODO: prompt with query and context injections from settings (for when having multi tenants on aws services)
     return (
         "You are Sprint Marketing’s assistant for prospective customers.\n"
         "Write a concise, friendly answer using only the Knowledge below.\n"
